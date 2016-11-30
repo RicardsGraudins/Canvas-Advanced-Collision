@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+
+<html>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Canvas</title>
+
+    <style type="text/css">
+		body {
+			background-color: white;
+		}
+		canvas {
+			border: 1px solid grey; 
+			background-color: pink;
+		}
+    </style>
+
+  </head>
+
+  <body>
+
+    <canvas id="canvas-for-ball" height="550" width="800"></canvas>
+	<!-- update functions do not have a terminate feature therefore page should be refreshed before triggering a second onclick event -->
+	<!-- canvas can also be clicked without an active function, triggering the mouse click event that draws a different color ball -->
+	<br>
+	<button onclick="setInterval(update, 10)">2 Balls</button>
+	<button onclick="setInterval(update2, 10)">2 Pizza</button>
+	<button onclick="setInterval(update3, 10)">Both</button>
+	</br>
+
+    <script type="text/javascript">
+		// Gets a handle to the element with id canvasOne.
+		var canvas = document.getElementById("canvas-for-ball");
+		// Get a 2D context for the canvas.
+		var ctx = canvas.getContext("2d");
+		var color = '#B22222';
+		
+		function ball(x, y, r, dx, dy, mass) {
+			this.x = x;
+			this.y = y;
+			this.r = r;
+			this.dx = dx;
+			this.dy = dy;
+			this.mass = mass;
+			
+			this.draw = function(){
+				ctx.beginPath();
+				ctx.arc (this.x, this.y, this.r, 0, Math.PI * 2, false);
+				//ctx.stroke();
+				ctx.fillStyle = color;
+				ctx.fill();
+				//bouncing off walls code
+				this.x += this.dx;
+				this.y += this.dy;
+			
+				//if x cord is greater than canvas width(800) or x cord less than ball radius, change dx sign
+				if(this.x + this.dx > canvas.width-this.r || this.x + this.dx < this.r){
+					this.dx = -this.dx; 
+				}
+				
+				//if y cord is greater than canvas height(550) or y cord is less than ball radius, change dy sign
+				if(this.y + this.dy > canvas.height-this.r || this.y + this.dy < this.r){
+					this.dy = -this.dy;
+				}
+				
+				//for mouse click
+				//if x > canvas.width then take away 15 from x to make it bounce back into canvas
+				if(this.x > canvas.width-this.r) {
+					this.x -= 15;
+				}
+					
+				//if y > canvas.height then take away 15 from y to make it bounce back into canvas
+				if(this.y > canvas.height-this.r) {
+					this.y -= 15;
+				}
+			}
+			
+			this.resize = function (radius){
+				this.r = radius;
+			}
+			
+			this.move = function (xpos, ypos){
+				this.x += xpos;
+				this.y =+ ypos;
+			}
+			
+			//change color
+			this.setColor = function(color) {
+				ctx.fillStyle = color;
+				ctx.fill();
+			}
+		}//ball
+		
+	//pizza vars
+	var pizzaNum = 1;
+	var slices = 7;
+	var pizzaAngle = 2 * Math.PI / slices;
+		
+	function pizza(x, y, r, dx, dy, mass){
+			this.x = x;
+			this.y = y;
+			this.r = r;
+			this.dx = dx;
+			this.dy = dy;
+			this.mass = mass;
+			
+			this.draw = function(){ //draw circle -> draw slices
+				for(var i = 1; i <= pizzaNum; i++){
+					this.slices(i * this.r); //outer layer
+					//this.slices(i * this.r - .10); //makes pizza shrink
+				}
+
+				//if x cord is greater than canvas width or x cord less than radius, change dx sign
+				if(this.x + this.dx > canvas.width-this.r || this.x + this.dx < this.r){
+					this.dx = -this.dx; 
+				}
+				
+				//if y cord is greater than canvas height or y cord is less than radius, change dy sign
+				if(this.y + this.dy > canvas.height-this.r || this.y + this.dy < this.r){
+					this.dy = -this.dy;
+				}
+				
+				//if x > canvas.width then take away 15 from x to make it bounce back into canvas
+				if(this.x > canvas.width-this.r) {
+					this.x -= 15;
+				}
+				
+				//if y > canvas.height then take away 15 from y to make it bounce back into canvas
+				if(this.y > canvas.height-this.r) {
+					this.y -= 15;
+				}
+				
+				this.x += this.dx;
+				this.y += this.dy;			
+			}
+			
+			
+			this.slices = function(radius){ //make slices
+				this.r = radius;
+				for (var i = 0; i < slices; i++){
+					ctx.beginPath();
+					ctx.moveTo(this.x, this.y);
+					ctx.arc(this.x, this.y, this.r, i*pizzaAngle, (i+1)*pizzaAngle, false);
+					ctx.arc(this.x, this.y, 50, i*pizzaAngle, (i+1)*pizzaAngle, false); //funky pizza crust
+					ctx.lineWidth = this.r;
+					ctx.fillStyle = '#F5F5DC';
+					ctx.fill();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = '#444';
+					ctx.stroke();
+				}
+				
+				
+				//drawing peperoni
+				ctx.beginPath();
+				ctx.arc(this.x + 7, this.y - 35,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+				
+				ctx.beginPath();
+				ctx.arc(this.x + 9, this.y + 30,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+				
+				
+				ctx.beginPath();
+				ctx.arc(this.x + 30, this.y - 15,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+
+				
+				ctx.beginPath();
+				ctx.arc(this.x - 20, this.y + 25,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+
+				
+				ctx.beginPath();
+				ctx.arc(this.x - 22, this.y - 25,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+
+				ctx.beginPath();
+				ctx.arc(this.x - 30, this.y + 2,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();
+
+				ctx.beginPath();
+				ctx.arc(this.x + 29, this.y + 12,7,0,2*Math.PI);
+				ctx.fillStyle = '#B22222';
+				ctx.fill();
+				ctx.closePath();				
+				
+			}
+	}//pizza
+	
+		//var p1 = new pizza(70, 70, 60, 2, -2, 20); //different mass
+		//var p2 = new pizza(180, 180, 80, -2, 2, 30); //different mass and size
+		
+		var p1 = new pizza(70, 70, 60, 2, -2, 10);
+		var p2 = new pizza(180, 180, 60, 2, -2, 10);
+		
+		  var topPos = canvas.offsetTop; //offsetTop canvas
+		  var leftPos = canvas.offsetLeft; //offsetLeft canvas
+		
+		  // User interaction only controls b1
+		  // Add a Javascript event listener to the keypress event.
+		  window.addEventListener("keypress", function(event) { 
+			  // Just log the event to the console.
+			  console.log(event);
+		  });
+
+		  //keypresses with jQuery
+		  $(document.body).on('keydown', function(e) {
+			  console.log(e.which);
+			  switch (e.which) {
+			  // key code for left arrow
+			  case 37:
+				  //console.log('left arrow key pressed!');
+				  b1.dx -= 1;
+				  break;
+				  
+			  // key code for up arrow
+			  case 38:
+				  //console.log('up arrow key pressed!');
+				  b1.dy -= 1;
+				  break;
+
+			  // key code for right arrow
+			  case 39:
+				  //console.log('right arrow key pressed!');
+				  b1.dx += 1;
+				  break;
+				  
+			  // key code for down arrow
+			  case 40:
+				  //console.log('down arrow key pressed!');
+				  b1.dy += 1;
+				  break;
+			  }
+		  });
+		  
+		canvas.addEventListener("click", function(event) { //on click change b1(x,y) to mouse click
+			ctx.beginPath();
+			b1.x = event.clientX - leftPos;
+			b1.y = event.clientY - topPos;
+			b1.draw();
+			//small experiment to change color on mouse click
+			var counter = 41 * b1.x;
+			var colorValue = counter + 15;
+			color = 'hsl(' + colorValue + ',70%, 60%)';
+			'#'+(Math.random()*0xFFFFFF<<0).toString(16);
+			ctx.fill();
+		});
+		
+		var b1 = new ball(300, 300, 30, 2, -2, 10);
+		var b2 = new ball(400, 400, 30, 2, -2, 10);
+		
+		var colX;
+		var colY;
+		var colAngle;
+		var distance;
+		var magnitude_1;
+		var magnitude_2;
+		var direction_1;
+		var direction_2;
+		var new_dy_1;
+		var new_dy_2;
+		var new_dx_1;
+		var new_dx_2;
+		var final_dx_1;
+		var final_dx_2
+		var final_dy_1;
+		var final_dy_2;
+		
+		//collision between 2 balls
+		function update(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			b1.draw();
+			b2.draw();
+			
+			colX = b1.x - b2.x; //horizontal distance
+			colY = b1.y - b2.y; //vertical distance
+			//console.log(colX);
+			//console.log(colY);
+			
+			distance = Math.sqrt(Math.pow(colX,2) + Math.pow(colY,2)); // ditance between 2 circles
+			//distance = Math.sqrt(colX^^2 + colY^^2);
+			//console.log(distance);
+			
+			if (distance <= b1.r + b2.r){ //if distance <= b1 radius + b2 radius
+				console.log('Collision Detected');
+
+				colAngle = Math.atan2(colY, colX); //collision angle
+				//console.log(colAngle);
+				
+				magnitude_1 = Math.sqrt(b1.dx * b1.dx + b1.dy * b1.dy) //b1 speed
+				magnitude_2 = Math.sqrt(b2.dx * b2.dx + b2.dy * b2.dy) //b2 speed
+				
+				direction_1 = Math.atan2(b1.dy, b1.dx); //b1 direction
+				direction_2 = Math.atan2(b2.dy,b2.dx) //b2 direction
+				
+				new_dx_1 = magnitude_1 * Math.cos(direction_1 - colAngle); //new dx velocity
+				
+				new_dy_1 = magnitude_1 * Math.sin(direction_1 - colAngle); //new velocity for other vectors
+				new_dx_2 = magnitude_2 * Math.cos(direction_2 - colAngle);
+				new_dy_2 = magnitude_2 * Math.sin(direction_2 - colAngle);
+				
+				//final dx for b1
+				final_dx_1 = ((b1.mass - b2.mass) * new_dx_1 +(b2.mass + b2.mass)* new_dx_2)/(b1.mass + b2.mass);
+				
+				//final dy for b2
+				final_dx_2 = ((b1.mass + b1.mass)* new_dx_1 +(b2.mass - b1.mass)* new_dx_2)/(b1.mass + b2.mass);
+				
+				//y speed does not change (1d collision)
+				final_dy_1 = new_dy_1;
+				final_dy_2 = new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				b1.dx = Math.cos(colAngle) * final_dx_1 + Math.cos(colAngle + Math.PI /2) * final_dy_1;
+				b1.dy = Math.sin(colAngle) * final_dx_1 + Math.sin(colAngle + Math.PI /2) * final_dy_1;
+				b2.dx = Math.cos(colAngle) * final_dx_2 + Math.cos(colAngle + Math.PI /2) * final_dy_2;
+				b2.dy = Math.sin(colAngle) * final_dx_2 + Math.sin(colAngle + Math.PI /2) * final_dy_2;
+			}//if
+		}//update
+		
+		var pizza_colX;
+		var pizza_colY;
+		var pizza_colAngle;
+		var pizza_distance;
+		var pizza_magnitude_1;
+		var pizza_magnitude_2;
+		var pizza_direction_1;
+		var pizza_direction_2;
+		var pizza_new_dy_1;
+		var pizza_new_dy_2;
+		var pizza_new_dx_1;
+		var pizza_new_dx_2;
+		var pizza_final_dx_1;
+		var pizza_final_dx_2
+		var pizza_final_dy_1;
+		var pizza_final_dy_2;
+		
+		//collision between 2 pizza
+		function update2(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			p1.draw();
+			p2.draw();
+			
+			pizza_colX = p1.x - p2.x; //horizontal distance
+			pizza_colY = p1.y - p2.y; //vertical distance
+			
+			pizza_distance = Math.sqrt(Math.pow(pizza_colX,2) + Math.pow(pizza_colY,2)); //distance between 2 pizza
+			
+			if (pizza_distance <= p1.r + p2.r){ //if distance <= p1 radius + p2 radius
+				console.log('Collision Detected');
+
+				pizza_colAngle = Math.atan2(pizza_colY, pizza_colX); //collision angle
+				//console.log(pizza_colAngle);
+				
+				pizza_magnitude_1 = Math.sqrt(p1.dx * p1.dx + p1.dy * p1.dy) //p1 speed
+				pizza_magnitude_2 = Math.sqrt(p2.dx * p2.dx + p2.dy * p2.dy) //p2 speed
+				
+				pizza_direction_1 = Math.atan2(p1.dy, p1.dx); //p1 direction
+				pizza_direction_2 = Math.atan2(p2.dy, p2.dx) //p2 direction
+				
+				pizza_new_dx_1 = pizza_magnitude_1 * Math.cos(pizza_direction_1 - pizza_colAngle); //new dx velocity
+				
+				pizza_new_dy_1 = pizza_magnitude_1 * Math.sin(pizza_direction_1 - pizza_colAngle); //new velocity for other vectors
+				pizza_new_dx_2 = pizza_magnitude_2 * Math.cos(pizza_direction_2 - pizza_colAngle);
+				pizza_new_dy_2 = pizza_magnitude_2 * Math.sin(pizza_direction_2 - pizza_colAngle);
+				
+				//final dx for p1
+				pizza_final_dx_1 = ((p1.mass - p2.mass) * pizza_new_dx_1 +(p2.mass + p2.mass)* pizza_new_dx_2)/(p1.mass + p2.mass);
+				
+				//final dy for p2
+				pizza_final_dx_2 = ((p1.mass + p1.mass) * pizza_new_dx_1 +(p2.mass - p1.mass)* pizza_new_dx_2)/(p1.mass + p2.mass);
+				
+				//y speed does not change (1d collision)
+				pizza_final_dy_1 = pizza_new_dy_1;
+				pizza_final_dy_2 = pizza_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p1.dx = Math.cos(pizza_colAngle) * pizza_final_dx_1 + Math.cos(pizza_colAngle + Math.PI /2) * pizza_final_dy_1;
+				p1.dy = Math.sin(pizza_colAngle) * pizza_final_dx_1 + Math.sin(pizza_colAngle + Math.PI /2) * pizza_final_dy_1;
+				p2.dx = Math.cos(pizza_colAngle) * pizza_final_dx_2 + Math.cos(pizza_colAngle + Math.PI /2) * pizza_final_dy_2;
+				p2.dy = Math.sin(pizza_colAngle) * pizza_final_dx_2 + Math.sin(pizza_colAngle + Math.PI /2) * pizza_final_dy_2;
+			}//if
+		}
+		
+		//if p1 hits b1 variables
+		var p1_col_b1_colX;
+		var p1_col_b1_colY;
+		var p1_col_b1_colAngle;
+		var p1_col_b1_distance;
+		var p1_col_b1_magnitude_1;
+		var p1_col_b1_magnitude_2;
+		var p1_col_b1_direction_1;
+		var p1_col_b1_direction_2;
+		var p1_col_b1_new_dy_1;
+		var p1_col_b1_new_dy_2;
+		var p1_col_b1_new_dx_1;
+		var p1_col_b1_new_dx_2;
+		var p1_col_b1_final_dx_1;
+		var p1_col_b1_final_dx_2
+		var p1_col_b1_final_dy_1;
+		var p1_col_b1_final_dy_2;
+		
+		//if p1 hits b2 variables
+		var p1_col_b2_colX;
+		var p1_col_b2_colY;
+		var p1_col_b2_colAngle;
+		var p1_col_b2_distance;
+		var p1_col_b2_magnitude_1;
+		var p1_col_b2_magnitude_2;
+		var p1_col_b2_direction_1;
+		var p1_col_b2_direction_2;
+		var p1_col_b2_new_dy_1;
+		var p1_col_b2_new_dy_2;
+		var p1_col_b2_new_dx_1;
+		var p1_col_b2_new_dx_2;
+		var p1_col_b2_final_dx_1;
+		var p1_col_b2_final_dx_2
+		var p1_col_b2_final_dy_1;
+		var p1_col_b2_final_dy_2;
+		
+		//if p2 hits b1 variables
+		var p2_col_b1_colX;
+		var p2_col_b1_colY;
+		var p2_col_b1_colAngle;
+		var p2_col_b1_distance;
+		var p2_col_b1_magnitude_1;
+		var p2_col_b1_magnitude_2;
+		var p2_col_b1_direction_1;
+		var p2_col_b1_direction_2;
+		var p2_col_b1_new_dy_1;
+		var p2_col_b1_new_dy_2;
+		var p2_col_b1_new_dx_1;
+		var p2_col_b1_new_dx_2;
+		var p2_col_b1_final_dx_1;
+		var p2_col_b1_final_dx_2
+		var p2_col_b1_final_dy_1;
+		var p2_col_b1_final_dy_2;
+		
+		//if p2 hits b2 variables
+		var p2_col_b2_colX;
+		var p2_col_b2_colY;
+		var p2_col_b2_colAngle;
+		var p2_col_b2_distance;
+		var p2_col_b2_magnitude_1;
+		var p2_col_b2_magnitude_2;
+		var p2_col_b2_direction_1;
+		var p2_col_b2_direction_2;
+		var p2_col_b2_new_dy_1;
+		var p2_col_b2_new_dy_2;
+		var p2_col_b2_new_dx_1;
+		var p2_col_b2_new_dx_2;
+		var p2_col_b2_final_dx_1;
+		var p2_col_b2_final_dx_2
+		var p2_col_b2_final_dy_1;
+		var p2_col_b2_final_dy_2;
+		
+		ctx.font = "15px Verdana"; //set font for player
+		var score = 0; // stores score
+		/*
+		When b1 (controlled by player) hits b2, add 10 to score
+		If b1 hits p1 or p2, minus 5 from score
+		*/
+		
+		//collision between 2 balls and 2 pizza
+		function update3(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			b1.draw();
+			b2.draw();
+			p1.draw();
+			p2.draw();
+			
+			colX = b1.x - b2.x; 
+			colY = b1.y - b2.y; 
+			
+			pizza_colX = p1.x - p2.x; 
+			pizza_colY = p1.y - p2.y;
+			
+			p1_col_b1_colX = p1.x - b1.x;
+			p1_col_b1_colY = p1.y - b1.y;
+			
+			p1_col_b2_colX = p1.x - b2.x;
+			p1_col_b2_colY = p1.y - b2.y;
+			
+			p2_col_b1_colX = p2.x - b1.x;
+			p2_col_b1_colY = p2.y - b1.y;
+			
+			p2_col_b2_colX = p2.x - b2.x;
+			p2_col_b2_colY = p2.y - b2.y;
+			
+			distance = Math.sqrt(Math.pow(colX,2) + Math.pow(colY,2));
+			pizza_distance = Math.sqrt(Math.pow(pizza_colX,2) + Math.pow(pizza_colY,2));
+			p1_col_b1_distance = Math.sqrt(Math.pow(p1_col_b1_colX,2) + Math.pow(p1_col_b1_colY,2));
+			p1_col_b2_distance = Math.sqrt(Math.pow(p1_col_b2_colX,2) + Math.pow(p1_col_b2_colY,2));
+			p2_col_b1_distance = Math.sqrt(Math.pow(p2_col_b1_colX,2) + Math.pow(p2_col_b1_colY,2));
+			p2_col_b2_distance = Math.sqrt(Math.pow(p2_col_b2_colX,2) + Math.pow(p2_col_b2_colY,2));
+			
+			if (distance <= b1.r + b2.r){ //if distance <= b1 radius + b2 radius
+				console.log('Collision Detected');
+				score = score + 10;
+
+				colAngle = Math.atan2(colY, colX); //collision angle
+				//console.log(colAngle);
+				
+				magnitude_1 = Math.sqrt(b1.dx * b1.dx + b1.dy * b1.dy) //b1 speed
+				magnitude_2 = Math.sqrt(b2.dx * b2.dx + b2.dy * b2.dy) //b2 speed
+				
+				direction_1 = Math.atan2(b1.dy, b1.dx); //b1 direction
+				direction_2 = Math.atan2(b2.dy,b2.dx) //b2 direction
+				
+				new_dx_1 = magnitude_1 * Math.cos(direction_1 - colAngle); //new dx velocity
+				
+				new_dy_1 = magnitude_1 * Math.sin(direction_1 - colAngle); //new velocity for other vectors
+				new_dx_2 = magnitude_2 * Math.cos(direction_2 - colAngle);
+				new_dy_2 = magnitude_2 * Math.sin(direction_2 - colAngle);
+				
+				//final dx for b1
+				final_dx_1 = ((b1.mass - b2.mass) * new_dx_1 +(b2.mass + b2.mass)* new_dx_2)/(b1.mass + b2.mass);
+				
+				//final dy for b2
+				final_dx_2 = ((b1.mass + b1.mass)* new_dx_1 +(b2.mass - b1.mass)* new_dx_2)/(b1.mass + b2.mass);
+				
+				//y speed does not change (1d collision)
+				final_dy_1 = new_dy_1;
+				final_dy_2 = new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				b1.dx = Math.cos(colAngle) * final_dx_1 + Math.cos(colAngle + Math.PI /2) * final_dy_1;
+				b1.dy = Math.sin(colAngle) * final_dx_1 + Math.sin(colAngle + Math.PI /2) * final_dy_1;
+				b2.dx = Math.cos(colAngle) * final_dx_2 + Math.cos(colAngle + Math.PI /2) * final_dy_2;
+				b2.dy = Math.sin(colAngle) * final_dx_2 + Math.sin(colAngle + Math.PI /2) * final_dy_2;
+			}//if
+			
+			if (pizza_distance <= p1.r + p2.r){ //if distance <= p1 radius + p2 radius
+				console.log('Collision Detected');
+
+				pizza_colAngle = Math.atan2(pizza_colY, pizza_colX); //collision angle
+				//console.log(colAngle);
+				
+				pizza_magnitude_1 = Math.sqrt(p1.dx * p1.dx + p1.dy * p1.dy) //p1 speed
+				pizza_magnitude_2 = Math.sqrt(p2.dx * p2.dx + p2.dy * p2.dy) //p2 speed
+				
+				pizza_direction_1 = Math.atan2(p1.dy, p1.dx); //p1 direction
+				pizza_direction_2 = Math.atan2(p2.dy, p2.dx) //p2 direction
+				
+				pizza_new_dx_1 = pizza_magnitude_1 * Math.cos(pizza_direction_1 - pizza_colAngle); //new dx velocity
+				
+				pizza_new_dy_1 = pizza_magnitude_1 * Math.sin(pizza_direction_1 - pizza_colAngle); //new velocity for other vectors
+				pizza_new_dx_2 = pizza_magnitude_2 * Math.cos(pizza_direction_2 - pizza_colAngle);
+				pizza_new_dy_2 = pizza_magnitude_2 * Math.sin(pizza_direction_2 - pizza_colAngle);
+				
+				//final dx for p1
+				pizza_final_dx_1 = ((p1.mass - p2.mass) * pizza_new_dx_1 +(p2.mass + p2.mass)* pizza_new_dx_2)/(p1.mass + p2.mass);
+				
+				//final dy for p2
+				pizza_final_dx_2 = ((p1.mass + p1.mass) * pizza_new_dx_1 +(p2.mass - p1.mass)* pizza_new_dx_2)/(p1.mass + p2.mass);
+				
+				//y speed does not change (1d collision)
+				pizza_final_dy_1 = pizza_new_dy_1;
+				pizza_final_dy_2 = pizza_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p1.dx = Math.cos(pizza_colAngle) * pizza_final_dx_1 + Math.cos(pizza_colAngle + Math.PI /2) * pizza_final_dy_1;
+				p1.dy = Math.sin(pizza_colAngle) * pizza_final_dx_1 + Math.sin(pizza_colAngle + Math.PI /2) * pizza_final_dy_1;
+				p2.dx = Math.cos(pizza_colAngle) * pizza_final_dx_2 + Math.cos(pizza_colAngle + Math.PI /2) * pizza_final_dy_2;
+				p2.dy = Math.sin(pizza_colAngle) * pizza_final_dx_2 + Math.sin(pizza_colAngle + Math.PI /2) * pizza_final_dy_2;
+			}//if
+			
+			//p1 collides with b1
+			if (p1_col_b1_distance <= p1.r + b1.r){ //if distance <= p1 radius + b1 radius
+				console.log('Collision Detected');
+				score = score - 5;
+
+				p1_col_b1_colAngle = Math.atan2(p1_col_b1_colY, p1_col_b1_colX); //collision angle
+				
+				p1_col_b1_magnitude_1 = Math.sqrt(p1.dx * p1.dx + p1.dy * p1.dy) //p1 speed
+				p1_col_b1_magnitude_2 = Math.sqrt(b1.dx * b1.dx + b1.dy * b1.dy) //b1 speed
+				
+				p1_col_b1_direction_1 = Math.atan2(p1.dy, p1.dx); //p1 direction
+				p1_col_b1_direction_2 = Math.atan2(b1.dy, b1.dx) //b1 direction
+				
+				p1_col_b1_new_dx_1 = p1_col_b1_magnitude_1 * Math.cos(p1_col_b1_direction_1 - p1_col_b1_colAngle); //new dx velocity
+				
+				p1_col_b1_new_dy_1 = p1_col_b1_magnitude_1 * Math.sin(p1_col_b1_direction_1 - p1_col_b1_colAngle); //new velocity for other vectors
+				p1_col_b1_new_dx_2 = p1_col_b1_magnitude_2 * Math.cos(p1_col_b1_direction_2 - p1_col_b1_colAngle);
+				p1_col_b1_new_dy_2 = p1_col_b1_magnitude_2 * Math.sin(p1_col_b1_direction_2 - p1_col_b1_colAngle);
+				
+				//final dx for p1
+				p1_col_b1_final_dx_1 = ((p1.mass - b1.mass) * p1_col_b1_new_dx_1 +(b1.mass + b1.mass)* p1_col_b1_new_dx_2)/(p1.mass + b1.mass);
+				
+				//final dy for b1
+				p1_col_b1_final_dx_2 = ((p1.mass + b1.mass) * p1_col_b1_new_dx_1 +(b1.mass - p1.mass)* p1_col_b1_new_dx_2)/(p1.mass + b1.mass);
+				
+				//y speed does not change (1d collision)
+				p1_col_b1_final_dy_1 = p1_col_b1_new_dy_1;
+				p1_col_b1_final_dy_2 = p1_col_b1_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p1.dx = Math.cos(p1_col_b1_colAngle) * p1_col_b1_final_dx_1 + Math.cos(p1_col_b1_colAngle + Math.PI /2) * p1_col_b1_final_dy_1;
+				p1.dy = Math.sin(p1_col_b1_colAngle) * p1_col_b1_final_dx_1 + Math.sin(p1_col_b1_colAngle + Math.PI /2) * p1_col_b1_final_dy_1;
+				b1.dx = Math.cos(p1_col_b1_colAngle) * p1_col_b1_final_dx_2 + Math.cos(p1_col_b1_colAngle + Math.PI /2) * p1_col_b1_final_dy_2;
+				b1.dy = Math.sin(p1_col_b1_colAngle) * p1_col_b1_final_dx_2 + Math.sin(p1_col_b1_colAngle + Math.PI /2) * p1_col_b1_final_dy_2;
+			}//if
+			
+			//p1 collides with b2
+			if (p1_col_b2_distance <= p1.r + b2.r){ //if distance <= p1 radius + b1 radius
+				console.log('Collision Detected');
+
+				p1_col_b2_colAngle = Math.atan2(p1_col_b2_colY, p1_col_b2_colX); //collision angle
+				
+				p1_col_b2_magnitude_1 = Math.sqrt(p1.dx * p1.dx + p1.dy * p1.dy) //p1 speed
+				p1_col_b2_magnitude_2 = Math.sqrt(b2.dx * b2.dx + b2.dy * b2.dy) //b2 speed
+				
+				p1_col_b2_direction_1 = Math.atan2(p1.dy, p1.dx); //p1 direction
+				p1_col_b2_direction_2 = Math.atan2(b2.dy, b2.dx) //b2 direction
+				
+				p1_col_b2_new_dx_1 = p1_col_b2_magnitude_1 * Math.cos(p1_col_b2_direction_1 - p1_col_b2_colAngle); //new dx velocity
+				
+				p1_col_b2_new_dy_1 = p1_col_b2_magnitude_1 * Math.sin(p1_col_b2_direction_1 - p1_col_b2_colAngle); //new velocity for other vectors
+				p1_col_b2_new_dx_2 = p1_col_b2_magnitude_2 * Math.cos(p1_col_b2_direction_2 - p1_col_b2_colAngle);
+				p1_col_b2_new_dy_2 = p1_col_b2_magnitude_2 * Math.sin(p1_col_b2_direction_2 - p1_col_b2_colAngle);
+				
+				//final dx for p1
+				p1_col_b2_final_dx_1 = ((p1.mass - b2.mass) * p1_col_b2_new_dx_1 +(b2.mass + b2.mass)* p1_col_b2_new_dx_2)/(p1.mass + b2.mass);
+				
+				//final dy for b2
+				p1_col_b2_final_dx_2 = ((p1.mass + b2.mass) * p1_col_b2_new_dx_1 +(b2.mass - p1.mass)* p1_col_b2_new_dx_2)/(p1.mass + b2.mass);
+				
+				//y speed does not change (1d collision)
+				p1_col_b2_final_dy_1 = p1_col_b2_new_dy_1;
+				p1_col_b2_final_dy_2 = p1_col_b2_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p1.dx = Math.cos(p1_col_b2_colAngle) * p1_col_b2_final_dx_1 + Math.cos(p1_col_b2_colAngle + Math.PI /2) * p1_col_b2_final_dy_1;
+				p1.dy = Math.sin(p1_col_b2_colAngle) * p1_col_b2_final_dx_1 + Math.sin(p1_col_b2_colAngle + Math.PI /2) * p1_col_b2_final_dy_1;
+				b2.dx = Math.cos(p1_col_b2_colAngle) * p1_col_b2_final_dx_2 + Math.cos(p1_col_b2_colAngle + Math.PI /2) * p1_col_b2_final_dy_2;
+				b2.dy = Math.sin(p1_col_b2_colAngle) * p1_col_b2_final_dx_2 + Math.sin(p1_col_b2_colAngle + Math.PI /2) * p1_col_b2_final_dy_2;
+			}//if
+			
+			//p2 collides with b1
+			if (p2_col_b1_distance <= p2.r + b1.r){ //if distance <= p2 radius + b1 radius
+				console.log('Collision Detected');
+				score = score - 5;
+
+				p2_col_b1_colAngle = Math.atan2(p2_col_b1_colY, p2_col_b1_colX); //collision angle
+				
+				p2_col_b1_magnitude_1 = Math.sqrt(p2.dx * p2.dx + p2.dy * p2.dy) //p2 speed
+				p2_col_b1_magnitude_2 = Math.sqrt(b1.dx * b1.dx + b1.dy * b1.dy) //b1 speed
+				
+				p2_col_b1_direction_1 = Math.atan2(p2.dy, p2.dx); //p2 direction
+				p2_col_b1_direction_2 = Math.atan2(b1.dy, b1.dx) //b1 direction
+				
+				p2_col_b1_new_dx_1 = p2_col_b1_magnitude_1 * Math.cos(p2_col_b1_direction_1 - p2_col_b1_colAngle); //new dx velocity
+				
+				p2_col_b1_new_dy_1 = p2_col_b1_magnitude_1 * Math.sin(p2_col_b1_direction_1 - p2_col_b1_colAngle); //new velocity for other vectors
+				p2_col_b1_new_dx_2 = p2_col_b1_magnitude_2 * Math.cos(p2_col_b1_direction_2 - p2_col_b1_colAngle);
+				p2_col_b1_new_dy_2 = p2_col_b1_magnitude_2 * Math.sin(p2_col_b1_direction_2 - p2_col_b1_colAngle);
+				
+				//final dx for p2
+				p2_col_b1_final_dx_1 = ((p2.mass - b1.mass) * p2_col_b1_new_dx_1 +(b1.mass + b1.mass)* p2_col_b1_new_dx_2)/(p2.mass + b1.mass);
+				
+				//final dy for b1
+				p2_col_b1_final_dx_2 = ((p2.mass + b1.mass) * p2_col_b1_new_dx_1 +(b1.mass - p2.mass)* p2_col_b1_new_dx_2)/(p2.mass + b1.mass);
+				
+				//y speed does not change (1d collision)
+				p2_col_b1_final_dy_1 = p2_col_b1_new_dy_1;
+				p2_col_b1_final_dy_2 = p2_col_b1_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p2.dx = Math.cos(p2_col_b1_colAngle) * p2_col_b1_final_dx_1 + Math.cos(p2_col_b1_colAngle + Math.PI /2) * p2_col_b1_final_dy_1;
+				p2.dy = Math.sin(p2_col_b1_colAngle) * p2_col_b1_final_dx_1 + Math.sin(p2_col_b1_colAngle + Math.PI /2) * p2_col_b1_final_dy_1;
+				b1.dx = Math.cos(p2_col_b1_colAngle) * p2_col_b1_final_dx_2 + Math.cos(p2_col_b1_colAngle + Math.PI /2) * p2_col_b1_final_dy_2;
+				b1.dy = Math.sin(p2_col_b1_colAngle) * p2_col_b1_final_dx_2 + Math.sin(p2_col_b1_colAngle + Math.PI /2) * p2_col_b1_final_dy_2;
+			}//if
+			
+			//p2 collides with b2
+			if (p2_col_b2_distance <= p2.r + b2.r){ //if distance <= p2 radius + b2 radius
+				console.log('Collision Detected');
+
+				p2_col_b2_colAngle = Math.atan2(p2_col_b2_colY, p2_col_b2_colX); //collision angle
+				
+				p2_col_b2_magnitude_1 = Math.sqrt(p2.dx * p2.dx + p2.dy * p2.dy) //p2 speed
+				p2_col_b2_magnitude_2 = Math.sqrt(b2.dx * b2.dx + b2.dy * b2.dy) //b2 speed
+				
+				p2_col_b2_direction_1 = Math.atan2(p2.dy, p2.dx); //p2 direction
+				p2_col_b2_direction_2 = Math.atan2(b2.dy, b2.dx) //b2 direction
+				
+				p2_col_b2_new_dx_1 = p2_col_b2_magnitude_1 * Math.cos(p2_col_b2_direction_1 - p2_col_b2_colAngle); //new dx velocity
+				
+				p2_col_b2_new_dy_1 = p2_col_b2_magnitude_1 * Math.sin(p2_col_b2_direction_1 - p2_col_b2_colAngle); //new velocity for other vectors
+				p2_col_b2_new_dx_2 = p2_col_b2_magnitude_2 * Math.cos(p2_col_b2_direction_2 - p2_col_b2_colAngle);
+				p2_col_b2_new_dy_2 = p2_col_b2_magnitude_2 * Math.sin(p2_col_b2_direction_2 - p2_col_b2_colAngle);
+				
+				//final dx for p2
+				p2_col_b2_final_dx_1 = ((p2.mass - b2.mass) * p2_col_b2_new_dx_1 +(b2.mass + b2.mass)* p2_col_b2_new_dx_2)/(p2.mass + b2.mass);
+				
+				//final dy for b2
+				p2_col_b2_final_dx_2 = ((p2.mass + b2.mass) * p2_col_b2_new_dx_1 +(b2.mass - p2.mass)* p2_col_b2_new_dx_2)/(p2.mass + b2.mass);
+				
+				//y speed does not change (1d collision)
+				p2_col_b2_final_dy_1 = p2_col_b2_new_dy_1;
+				p2_col_b2_final_dy_2 = p2_col_b2_new_dy_2;
+				
+				//determine x and y on the original axis sytem using trig
+				p2.dx = Math.cos(p2_col_b2_colAngle) * p2_col_b2_final_dx_1 + Math.cos(p2_col_b2_colAngle + Math.PI /2) * p2_col_b2_final_dy_1;
+				p2.dy = Math.sin(p2_col_b2_colAngle) * p2_col_b2_final_dx_1 + Math.sin(p2_col_b2_colAngle + Math.PI /2) * p2_col_b2_final_dy_1;
+				b2.dx = Math.cos(p2_col_b2_colAngle) * p2_col_b2_final_dx_2 + Math.cos(p2_col_b2_colAngle + Math.PI /2) * p2_col_b2_final_dy_2;
+				b2.dy = Math.sin(p2_col_b2_colAngle) * p2_col_b2_final_dx_2 + Math.sin(p2_col_b2_colAngle + Math.PI /2) * p2_col_b2_final_dy_2;
+			}//if
+		ctx.fillStyle = 'Black';
+		ctx.fillText("Player", b1.x - 25, b1.y + 5);
+		
+		drawScore();
+		}//update 3
+		
+		//setInterval(update, 10); //runs update function every 10 miliseconds
+		//setInterval(update2, 10);
+		//setInterval(update3, 10);
+		
+		function drawScore() { //draw score on canvas
+			ctx.font = "16px Arial";
+			ctx.fillStyle = "green";
+			ctx.fillText("Score: " + score, 10, 20);
+		}
+    </script>
+
+  </body>
+
+</html>
